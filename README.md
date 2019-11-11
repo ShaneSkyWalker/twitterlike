@@ -65,3 +65,20 @@ az storage blob upload \
     --name <blob_name>
     --account-name <account_name>
 ```
+
+### References
+
+#### Code Rerefences
+
+* https://medium.com/medialesson/azure-functions-crud-with-table-storage-javascript-nodejs-9ce694dfcf76
+
+learn to use the azure-storage packages
+
+#### Package or framework used
+
+* "https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"
+* "https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"
+* "https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"
+* "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
+
+for the view and style in the front end.
