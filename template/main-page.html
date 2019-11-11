@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chat on Twitterlike</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
+        integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/base.css">
+    <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-sm-6" style="padding: 10px 0px 0px 100px;">
+                <div class="hero-unit" style="padding: 10px 0px;">
+                    <h3 style="color: cornflowerblue;">New Messages</h3>
+                </div>
+                <div style="border: 1px solid whitesmoke;" class="panel-custom">
+                    <form id="createtweet">
+                        <div rows="3" class="form-control" style="border: 1px; margin: 10px 0;" contenteditable="true"
+                            data-text="Write your things here :)" id="content"></div>
+                        <div class="text-right">
+                            <input type="submit"
+                                class="btn rounded-sm btn-primary-custom btn-sm text-white mt-2 mb-2 mr-2 text-right"
+                                value="Send!">
+                        </div>
+                    </form>
+                </div>
+                <div id="tweetoutput"></div>
+                <input id="whotimeline" placeholder="type someone's name">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-primary" id="original">Original timeline</button>
+                    <button type="button" class="btn btn-primary" id="userst">User's timeline</button>
+                </div>
+                <div id="timeline">
+                    <!-- <div class="wrapper">
+                        <span id="username" class="wrapper-name">Shane</span>
+                        <span id="time" class="wrapper-time">15m</span>
+                        <p>asdfasdfad</p>
+                    </div> -->
+                </div>
+            </div>
+            <div class="col-sm-6" id="search-user">
+                <div class="col-center-table">
+                    <div style="padding: 20px 20px 10px;">
+                        <div class="bs-example bs-example-form" role="form" id="searchform">
+                            <div class="row">
+                                <div class="col-lg-30">
+                                    <div class="input-group">
+                                        <div></div>
+                                        <input id="queryname" type="text" placeholder="Search user" class="form-control"
+                                            οnkeydοwn="if(event.keyCode==13){return false;}">
+                                    </div><!-- /input-group -->
+                                </div><!-- /.col-lg-6 -->
+                            </div><!-- /.row -->
+                        </div>
+                        <div id="searchres" class="list-group">
+                        </div>
+                    </div>
+                    <div id="user-following-me">
+                        <div class="hero-unit" style="padding: 10px 20px;">
+                            <h4 style="color: cornflowerblue;">I'm following</h4>
+                        </div>
+                        <div class="col-lg-18" id="imfollowing">
+                            <!-- <div class="wrapper">
+                                <span id="username"></span>
+                                <span id="email"></span>
+                            </div> -->
+                        </div>
+                    </div>
+                    <div id="user-I-followed">
+                        <div class="hero-unit" style="padding: 10px 20px;">
+                            <h4 style="color: cornflowerblue;">Following me</h4>
+                        </div>
+                        <div class="col-lg-18" id="followingme">
+                            <!-- <div class="wrapper">
+                                <span id="username"></span>
+                                <span id="email"></span>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+
+        const username = window.location.search.split('=')[1];
+        // ------- createtweet -------
+        document.getElementById("createtweet").addEventListener('submit', createtweet);
+
+        function processResponse(response) {
+            if (response.ok) {
+                output =
+                    `
+        <div class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Successfully Tweeted!</strong>
+        </div>
+        `;
+                document.getElementById('tweetoutput').innerHTML = output;
+            } else {
+                output =
+                    `
+        <div class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong>Tweet failed!</strong> 
+        </div>       
+        `;
+                document.getElementById('tweetoutput').innerHTML = output;
+                throw new Error('Network response was not ok.');
+            }
+        }
+
+        function createtweet(e) {
+            e.preventDefault();
+
+            var content = document.getElementById('content').textContent;
+            //fetch('', {
+            fetch('http://localhost:7071/api/AddaTweet', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    sender: username,
+                    content: content
+                })
+            })
+                .then((res) => processResponse(res))
+                .then((data) => { getInfo(username) })
+                .catch(function (error) { })
+        }
+
+
+        // ------- gain tweet information flow -------
+        function processTweetResponse(response) {
+            if (!response.ok) {
+                throw new Error('Network response was not ok.');
+            } else {
+                return response.json()
+            }
+        }
+
+        function processTweetData(data) {
+            var str = '';
+            data.forEach(element => {
+                output = `<div class="wrapper">
+                        <span id="username" class="wrapper-name">` + element.Sender + `</span>
+                        <span id="time" class="wrapper-time">` + element.Timestamp + `</span>
+                        <p>` + element.Content + `</p>
+                    </div>`
+                str += output;
+            });
+            document.getElementById('timeline').innerHTML = str;
+        }
+
+        function getInfo(user) {
+            fetch('http://localhost:7071/api/infoflow', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: user
+                })
+            })
+                .then((res) => processTweetResponse(res))
+                .then((data) => processTweetData(data))
+                .catch(function (error) { })
+        }
+
+        // ------- show whom I followed -------
+        function processFollowData(data) {
+            var str = '';
+            data.forEach(element => {
+                output = `<div class="wrapper">
+                        <div id="otheruser" class="wrapper-name">` + element + `</div>
+                    </div>`
+                str += output;
+            });
+            document.getElementById('imfollowing').innerHTML = str;
+        }
+
+        function getfollowing(user) {
+            fetch('http://localhost:7071/api/IamFollowing', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: user
+                })
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error('Network response was not ok.');
+                    } else {
+                        return res.json()
+                    }
+                })
+                .then((data) => processFollowData(data))
+                .catch(function (error) { })
+        }
+
+        // ------- show who is following me -------
+        function processFollowedData(data) {
+            var str = '';
+            data.forEach(element => {
+                output = `<div class="wrapper">
+                        <div id="otheruser" class="wrapper-name">` + element + `</div>
+                    </div>`
+                str += output;
+            });
+            document.getElementById('followingme').innerHTML = str;
+        }
+
+        function getfollowed(user) {
+            fetch('http://localhost:7071/api/MyFollower', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: user
+                })
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error('Network response was not ok.');
+                    } else {
+                        return res.json()
+                    }
+                })
+                .then((data) => processFollowedData(data))
+                .catch(function (error) { })
+        }
+        function loadfunc(username) {
+            document.getElementById('original').classList.add('active');
+            window.onload = getInfo(username);
+            getfollowing(username);
+            getfollowed(username);
+        }
+        window.onload = loadfunc(username);
+
+        // specific user's tweet flow
+        function gettweets(user) {
+            fetch('http://localhost:7071/api/MyTweetFlow', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: user
+                })
+            })
+                .then((res) => processTweetResponse(res))
+                .then((data) => processTweetData(data))
+                .catch(function (error) { })
+        }
+        // button onclick
+        document.getElementById("original").addEventListener('click', function () {
+            document.getElementById('original').classList.add('active');
+            document.getElementById('userst').classList.remove('active');
+            getInfo(username);
+        }, false);
+
+        document.getElementById("userst").addEventListener('click', function () {
+            document.getElementById('userst').classList.add('active');
+            document.getElementById('original').classList.remove('active');
+            var local = document.getElementById("whotimeline").value
+            gettweets(local ? local : username);
+        }, false);
+
+        // search username
+        document.getElementById("searchform").addEventListener("keydown", getUser)
+        function getUser(e) {
+            if (e.keyCode == 13) {
+
+                fetch('http://localhost:7071/api/QueryUser', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json, text/plain, */*',
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        followname: document.getElementById('queryname').value
+                    })
+                })
+                    .then((res) => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok.');
+                        } else {
+                            return res.json()
+                        }
+                    })
+                    .then((data) => {
+                        var objuser = data.follow
+                        var hasfollow = data.hasfollow
+                        if (!hasfollow) {
+                            output = `<div class="wrapper">
+                        <span id="queryname" class="wrapper-name">` + objuser[0] + `</span>
+                        <button id="dofollow" type="button" class="btn btn-primary" onclick="dofollow()">follow</button>
+                        </div>`
+                        } else {
+                            output = `<div class="wrapper">
+                        <span id="queryname" class="wrapper-name">` + objuser[0] + `</span>
+                        </div>`
+                        }
+
+                        document.getElementById('searchres').innerHTML = output;
+
+                    })
+                    .catch(function (error) { })
+            }
+
+        }
+
+        // do follow
+        function dofollow() {
+            fetch('http://localhost:7071/api/AddaFollow', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    following: document.getElementById('queryname').value
+                })
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error('Network response was not ok.');
+                    } else {
+                        return res.json()
+                    }
+                })
+                .then((data) => {
+                    getfollowing(username)
+                }).catch(function (error) { })}
+
+        function showtweets() {
+            
+        }
+    </script>
+</body>
+
+</html>

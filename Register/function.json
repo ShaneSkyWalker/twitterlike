@@ -17,10 +17,27 @@
     },
     {
       "type": "table",
+      "name": "outputTable",
+      "tableName": "User",
+      "connection": "twitterlikestorage_STORAGE",
+      "direction": "out"
+    },
+    {
+      "type": "table",
       "name": "inputTable",
       "tableName": "User",
       "partitionKey": "user",
       "rowKey": "{username}",
+      "take": 50,
+      "connection": "twitterlikestorage_STORAGE",
+      "direction": "in"
+    },
+    {
+      "type": "table",
+      "name": "inputTable2",
+      "tableName": "User",
+      "partitionKey": "user",
+      "rowKey": "{email}",
       "take": 50,
       "connection": "twitterlikestorage_STORAGE",
       "direction": "in"

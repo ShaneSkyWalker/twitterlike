@@ -2,8 +2,14 @@
   "name": "",
   "version": "",
   "description": "",
-  "scripts" : {
+  "scripts": {
     "test": "echo \"No tests yet...\""
   },
-  "author": ""
+  "author": "",
+  "dependencies": {
+    "azure-storage": "^2.10.3",
+    "mongodb": "^3.3.3",
+    "node-rsa": "^1.0.6",
+    "uuid": "^3.3.3"
+  }
 }

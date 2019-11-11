@@ -14,16 +14,6 @@
       "type": "http",
       "direction": "out",
       "name": "res"
-    },
-    {
-      "type": "table",
-      "name": "inputTable",
-      "tableName": "User",
-      "partitionKey": "user",
-      "rowKey": "{username}",
-      "take": 50,
-      "connection": "twitterlikestorage_STORAGE",
-      "direction": "in"
     }
   ]
 }
