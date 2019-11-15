@@ -11,14 +11,14 @@ module.exports = function (context, req) {
         var username = req.body.username;
         var followname = req.body.followname;
         var queryUser = new azure.TableQuery()
-            .select(['Username'])
+            .select(['Username', 'Following'])
             .where('Following eq ?', followname);
         tableService.queryEntities('Relations', queryUser, null, function(error, result, response) {
             if (!error) {
                 var follower = []
                 var hasfollow = false
                 response.body.value.forEach(element => {
-                    follower.push(element.Username)
+                    follower.push(element.Following)
                     if (username == element.Username) {
                         hasfollow = true
                     }
@@ -28,8 +28,18 @@ module.exports = function (context, req) {
                 context.res.status(500).json({ error: "Cannot find user's followers" })
             }
         })
-    }
-    else {
+    } else if (req.body.token) {
+        var queryUser = new azure.TableQuery()
+            .select(['username'])
+            .where('token eq ?', req.body.token)
+        tableService.queryEntities('User', queryUser, null, function(error, result, response) {
+            if (!error) {
+                context.res.status(201).json({ username: result.entries[0]['username']['_'] })
+            } else {
+                context.res.status(400).json({ error: "User not found!" })
+            }
+        })
+    } else {
         context.res = {
             status: 400,
             body: "Please pass the username on the query string or in the request body"

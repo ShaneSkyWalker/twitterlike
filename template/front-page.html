@@ -85,8 +85,8 @@
 
             let username = document.getElementById('username').value;
             let password = document.getElementById('password').value;
-            //fetch('https://twitterlike.azurewebsites.net/api/MyFirstFunction?code=aQ6C0LslLrffw5Ixo0/V/VTFIziasV6idETKbBKHe6vgHKFRFSjGxA==', {
-            fetch('http://localhost:7071/api/Login', {
+            fetch('https://twitterlike.azurewebsites.net/api/login?code=idHiIb7S5av2xDbayDzSzc9Z6QcW138GXOT4RIsaNj6rcLAHTeyVyA==', {
+            //fetch('http://localhost:7071/api/Login', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -99,10 +99,28 @@
             })
                 .then((res) => processResponse(res))
                 .then((data) => {
-                    //console.log(data)
-                    window.location.href = data.url
+                    // store current user into local storage
+                    if (data.url.indexOf("?") != -1) {
+                        var location = data.url.split("?")[0];
+                        var token = data.url.split("?")[1].split("=")[1];
+                        if (window.localStorage) {
+                            localStorage.setItem("token", token);
+                            localStorage.setItem("username", username);
+                        } else {
+                            document.cookie = "token=" + token + ";username=" + username;
+                        }
+                        window.location.href = location;
+                    } else {
+                        output =
+                            `
+                        <div class="alert alert-danger" role="alert">
+                            Oh no! Something went wrong :(
+                        </div>        
+                        `;
+                        document.getElementById('output').innerHTML = output;
+                    }
                 })
-                .catch(function(error) {})
+                .catch(function (error) { })
         }
     </script>
 

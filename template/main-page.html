@@ -12,12 +12,22 @@
     <script src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
     <script src="https://cdn.staticfile.org/popper.js/1.12.5/umd/popper.min.js"></script>
     <script src="https://cdn.staticfile.org/twitter-bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    <style type="text/css">
+        .error {
+            height: 100%;
+            width: 100%;
+            background: #EE6AA7;
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container-fluid">
         <div class="row">
-
+            <div class="error" id="error">
+                <h1>User login Error!!</h1>
+            </div>
             <div class="col-sm-6" style="padding: 10px 0px 0px 100px;">
                 <div class="hero-unit" style="padding: 10px 0px;">
                     <h3 style="color: cornflowerblue;">New Messages</h3>
@@ -92,7 +102,45 @@
     </div>
     <script>
 
-        const username = window.location.search.split('=')[1];
+        function getToken() {
+            var token = localStorage["name"];
+            if (token == undefined) {
+                token = document.cookie;
+            }
+            return token;
+        }
+        const token = getToken();
+        function verifyuser(token) {
+            fetch('https://twitterlike.azurewebsites.net/api/QueryUser?code=yQbUSSFQoWfNHVha2Hczxz5HqXr8YWfT79RpIGtu7qW1/kMGakSyuA==', {
+                //fetch('http://localhost:7071/api/QueryUser', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({
+                    token: token,
+                })
+            })
+                .then((res) => {
+                    if (!res.ok) {
+                        throw new Error('User not found');
+                    } else {
+                        return res.json()
+                    }
+                })
+                .catch(function (error) {
+                    document.getElementById("error").style.display=block;
+                })
+        }
+        let getusername = () => {
+            if (window.localStorage) {
+                return localStorage.getItem("username");
+            } else {
+                return document.cookie.split(";")[1].split("=")[1];
+            }
+        }
+        var username = getusername();
         // ------- createtweet -------
         document.getElementById("createtweet").addEventListener('submit', createtweet);
 
@@ -123,8 +171,8 @@
             e.preventDefault();
 
             var content = document.getElementById('content').textContent;
-            //fetch('', {
-            fetch('http://localhost:7071/api/AddaTweet', {
+            fetch('https://twitterlike.azurewebsites.net/api/AddaTweet?code=MuZKpoKGRgWQT1uGVpj9l15jDyliDjNdjKVR1qa7hssjcjis8X5UAw==', {
+                //fetch('http://localhost:7071/api/AddaTweet', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -165,7 +213,8 @@
         }
 
         function getInfo(user) {
-            fetch('http://localhost:7071/api/infoflow', {
+            fetch('https://twitterlike.azurewebsites.net/api/infoflow?code=kku52MYsm6kcc6RjhmaTB4e9sHaz9qNXd1DN9u2QTO2cvjnOKRPwzA==', {
+                //fetch('http://localhost:7071/api/infoflow', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -184,16 +233,19 @@
         function processFollowData(data) {
             var str = '';
             data.forEach(element => {
-                output = `<div class="wrapper">
+                if (element != undefined) {
+                    output = `<div class="wrapper">
                         <div id="otheruser" class="wrapper-name">` + element + `</div>
                     </div>`
-                str += output;
+                    str += output;
+                }
             });
             document.getElementById('imfollowing').innerHTML = str;
         }
 
         function getfollowing(user) {
-            fetch('http://localhost:7071/api/IamFollowing', {
+            fetch('https://twitterlike.azurewebsites.net/api/IamFollowing?code=anFI1iL41Q0zwRv7EuUXayOjTIlo6fVAnE6yhFSwpaqGL6g/19en8w==', {
+                //fetch('http://localhost:7071/api/IamFollowing', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -227,7 +279,8 @@
         }
 
         function getfollowed(user) {
-            fetch('http://localhost:7071/api/MyFollower', {
+            fetch('https://twitterlike.azurewebsites.net/api/MyFollower?code=HjQ2Eaw/CDrvzaLRIZDzZ91jARvkGagsb4Vb2SrGGCeRWcrkb9eQAw==', {
+                //fetch('http://localhost:7071/api/MyFollower', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -249,15 +302,20 @@
         }
         function loadfunc(username) {
             document.getElementById('original').classList.add('active');
-            window.onload = getInfo(username);
+            if (username == undefined) {
+                username = getusername();
+            }
+            getInfo(username);
             getfollowing(username);
             getfollowed(username);
+
         }
         window.onload = loadfunc(username);
 
         // specific user's tweet flow
         function gettweets(user) {
-            fetch('http://localhost:7071/api/MyTweetFlow', {
+            fetch('https://twitterlike.azurewebsites.net/api/MyTweetFlow?code=y7qizwa9YV//HcjOxxgen2v05IXEQJPTMPn4aDXEvSdMXdTdvgRwTg==', {
+                //fetch('http://localhost:7071/api/MyTweetFlow', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -289,8 +347,8 @@
         document.getElementById("searchform").addEventListener("keydown", getUser)
         function getUser(e) {
             if (e.keyCode == 13) {
-
-                fetch('http://localhost:7071/api/QueryUser', {
+                fetch('https://twitterlike.azurewebsites.net/api/QueryUser?code=yQbUSSFQoWfNHVha2Hczxz5HqXr8YWfT79RpIGtu7qW1/kMGakSyuA==', {
+                    //fetch('http://localhost:7071/api/QueryUser', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json, text/plain, */*',
@@ -310,18 +368,21 @@
                     })
                     .then((data) => {
                         var objuser = data.follow
-                        var hasfollow = data.hasfollow
-                        if (!hasfollow) {
-                            output = `<div class="wrapper">
+                        if (objuser.length == 0) {
+                            output = `<div class="wrapper">User not exist</div>`
+                        } else {
+                            var hasfollow = data.hasfollow
+                            if (!hasfollow) {
+                                output = `<div class="wrapper">
                         <span id="queryname" class="wrapper-name">` + objuser[0] + `</span>
                         <button id="dofollow" type="button" class="btn btn-primary" onclick="dofollow()">follow</button>
                         </div>`
-                        } else {
-                            output = `<div class="wrapper">
+                            } else {
+                                output = `<div class="wrapper">
                         <span id="queryname" class="wrapper-name">` + objuser[0] + `</span>
                         </div>`
+                            }
                         }
-
                         document.getElementById('searchres').innerHTML = output;
 
                     })
@@ -332,7 +393,8 @@
 
         // do follow
         function dofollow() {
-            fetch('http://localhost:7071/api/AddaFollow', {
+            fetch('https://twitterlike.azurewebsites.net/api/AddaFollow?code=YNnJaDkX7aajbpBhC8RQanE4WMG0WLm3WdaSzWW21PTzensDgVGWww==', {
+                //fetch('http://localhost:7071/api/AddaFollow', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json, text/plain, */*',
@@ -352,11 +414,9 @@
                 })
                 .then((data) => {
                     getfollowing(username)
-                }).catch(function (error) { })}
-
-        function showtweets() {
-            
+                }).catch(function (error) { })
         }
+
     </script>
 </body>
 

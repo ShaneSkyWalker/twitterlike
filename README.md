@@ -59,11 +59,7 @@ You may be prompted to sign into Azure. Follow the onscreen instructions.
 ### Upload file to a container
 
 ```shell
-az storage blob upload \
-    --file <local_file_path> \
-    --container-name <container_name> \
-    --name <blob_name>
-    --account-name <account_name>
+az storage blob upload-batch -s template/ -d \$web --account-name twitterlikestorage
 ```
 
 ### References

@@ -1,4 +1,5 @@
 const azure = require('azure-storage');
+const uuid = require('uuid/v1');
 
 const tableService = azure.createTableService('twitterlikestorage', '3ApdznssqQjjmOz07RtKH+55nhMWVj6fvvNEFXN19vD4Ym+P+R8N85PcHVDDxmt8yeRVwTMma4cr8euQLo08GQ==');
 
@@ -41,7 +42,8 @@ module.exports = async function (context, req) {
             RowKey: username,
             email: email,
             password: password,
-            username: username
+            username: username,
+            token: uuid()
         }
 
         context.bindings.outputTable = tableData;
